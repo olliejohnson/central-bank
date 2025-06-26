@@ -1,7 +1,7 @@
 local log = require "cb-common.log"
 local util = require "cb-common.util"
 local comms = require "cb-common.comms"
-local svsessions = require "session.svsessions"
+local svsessions = require "server.session.svsessions"
 
 local themes = require "graphics.themes"
 

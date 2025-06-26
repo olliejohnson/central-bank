@@ -1,6 +1,6 @@
 require("/initenv").init_env()
 local network = require("cb-common.network")
-local svsessions = require("session.svsessions")
+local svsessions = require("server.session.svsessions")
 
 local crash = require "cb-common.crash"
 local log = require "cb-common.log"
