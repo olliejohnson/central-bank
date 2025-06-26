@@ -75,7 +75,7 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
             tmp_cfg.LogDebug = en_dbg.get_value()
             tool_ctl.color_apply.hide(true)
             tool_ctl.color_next.show()
-            main_pane.set_value(5)
+            main_pane.set_value(4)
         else path_err.show() end
     end
 
