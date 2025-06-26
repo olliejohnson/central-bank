@@ -175,7 +175,7 @@ local function config_view(display)
 
     --#endregion
 
-    local settings = { settings_cfg, ini_cfg, fields, load_settings }
+    local settings = { settings_cfg, ini_cfg, tmp_cfg, fields, load_settings }
 
     --#region System Configuration
 
