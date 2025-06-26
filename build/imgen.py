@@ -60,7 +60,7 @@ def make_manifest(size):
             "ccryptolib": list_files("./ccryptolib"),
             "ecnet2": list_files("./ecnet2"),
             # platform files
-            "server": list_files("./cb-server")
+            "server": list_files("./server")
         },
         "depends" : {
             "server" : [ "system", "common", "graphics", "ccryptolib", "ecnet2" ],
