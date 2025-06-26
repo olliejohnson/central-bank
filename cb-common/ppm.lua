@@ -228,7 +228,8 @@ function ppm.should_terminate() return ppm_sys.terminate end
 function ppm.mount_all()
     local ifaces = peripheral.getNames()
 
-    log.debug(ifaces, false)
+    local pretty = require "cc.pretty"
+    log.debug(pretty.pretty_print(ifaces), false)
 
     ppm_sys.mounts = {}
 
