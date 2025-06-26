@@ -138,7 +138,7 @@ local function config_view(display)
         tool_ctl.viewing_config = true
         tool_ctl.gen_summary(settings_cfg)
         tool_ctl.settings_apply.hide(true)
-        main_pane.set_value(6)
+        main_pane.set_value(4)
     end
 
     if fs.exists("/server/config.lua") then

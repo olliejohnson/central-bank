@@ -156,7 +156,7 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
             settings.set("FrontPanelTheme", tmp_cfg.FrontPanelTheme)
             settings.set("ColorMode", tmp_cfg.ColorMode)
 
-            if settings.save("/supervisor.settings") then
+            if settings.save("/server.settings") then
                 load_settings(settings_cfg, true)
                 load_settings(ini_cfg)
                 clr_pane.set_value(3)
@@ -168,7 +168,7 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
             tool_ctl.viewing_config = false
             self.importing_legacy = false
             tool_ctl.settings_apply.show()
-            main_pane.set_value(6)
+            main_pane.set_value(4)
         end
     end
 
