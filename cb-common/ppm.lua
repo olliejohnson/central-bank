@@ -1,20 +1,20 @@
 --
--- Protected Peripheral Mananger
+-- Protected Peripheral Manager
 --
 
-local log = require "cb-common.log"
-local util require "cb-common.util"
+local log  = require("cb-common.log")
+local util = require("cb-common.util")
 
 ---@class ppm
 local ppm = {}
 
-local ACCESS_FAULT = nil ---@type nil
-local UNDEFINED_FIELD = "__PPM_UNDEF_FIELD_"
+local ACCESS_FAULT        = nil                 ---@type nil
+local UNDEFINED_FIELD     = "__PPM_UNDEF_FIELD__"
 local VIRTUAL_DEVICE_TYPE = "ppm_vdev"
 
-ppm.ACCESS_FAULT = ACCESS_FAULT
-ppm.UNDEFINED_FIELD = UNDEFINED_FIELD
-ppm.VIRTUAL_DEVICE_TYPE = VIRTUAL_DEVICE_TYPE
+ppm.ACCESS_FAULT          = ACCESS_FAULT
+ppm.UNDEFINED_FIELD       = UNDEFINED_FIELD
+ppm.VIRTUAL_DEVICE_TYPE   = VIRTUAL_DEVICE_TYPE
 
 ----------------------------
 -- PRIVATE DATA/FUNCTIONS --
@@ -23,7 +23,7 @@ ppm.VIRTUAL_DEVICE_TYPE = VIRTUAL_DEVICE_TYPE
 local REPORT_FREQUENCY = 20 -- log every 20 faults per function
 
 local ppm_sys = {
-    mounts = {}, ---@type { [string]: ppm_entry }
+    mounts = {},    ---@type { [string]: ppm_entry }
     next_vid = 0,
     auto_cf = false,
     faulted = false,
