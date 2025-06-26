@@ -135,7 +135,7 @@ local function config_view(display)
     local changelog = Div{parent=root_pane_div,x=1,y=1}
     local import_err = Div{parent=root_pane_div,x=1,y=1}
 
-    local main_pane = MultiPane{parent=root_pane_div,x=1,y=1,panes={main_page,log_cfg,clr_cfg,summary,changelog,import_err}}
+    local main_pane = MultiPane{parent=root_pane_div,x=1,y=1,panes={main_page,net_cfg,log_cfg,clr_cfg,summary,changelog,import_err}}
 
     --#region Main Page
 
@@ -152,7 +152,7 @@ local function config_view(display)
         tool_ctl.viewing_config = true
         tool_ctl.gen_summary(settings_cfg)
         tool_ctl.settings_apply.hide(true)
-        main_pane.set_value(4)
+        main_pane.set_value(5)
     end
 
     if fs.exists("/server/config.lua") then
@@ -167,7 +167,7 @@ local function config_view(display)
         tool_ctl.jumped_to_color = true
         tool_ctl.color_next.hide(true)
         tool_ctl.color_apply.show()
-        main_pane.set_value(3)
+        main_pane.set_value(4)
     end
 
     local function startup()
