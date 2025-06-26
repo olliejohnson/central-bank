@@ -473,7 +473,7 @@ elseif mode == "install" or mode == "update" then
     local function unchanged(dep)
         if dep == "system" then return not ver.boot.changed
         elseif dep == "graphics" then return not ver.graphics.changed
-        elseif dep == "common" then return not (ver.common.changed or ver.comms.changed)
+        elseif dep == "common" then return not ver.common.changed
         elseif dep == app then return not ver.app.changed
         else return true end
     end
