@@ -8,4 +8,4 @@
 ![Graphics](https://img.shields.io/endpoint?url=https%3A%2F%2Folliejohnson.github.io%2Fcentral-bank%2Fgraphics.json)
 
 
-![Server](https://img.shields.io/endpoint?url=https%3A%2F%2Folliejohnson.github.io%2Fcentral-bank%server.json)
+![Server](https://img.shields.io/endpoint?url=https%3A%2F%2Folliejohnson.github.io%2Fcentral-bank%2fserver.json)
