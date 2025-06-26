@@ -300,7 +300,7 @@ if #opts == 0 or opts[1] == "help" then
     lgray()
     println(" check       - check latest versions available")
     yellow()
-    println("               ccmsi check <branch> for target")
+    println("               cbins check <branch> for target")
     lgray()
     println(" install     - fresh install")
     println(" update      - update files")
