@@ -85,7 +85,7 @@ local function init(panel)
     -- accounts page
 
     local accounts_page = Div{parent=page_div, x=1, y=1, hidden=true}
-    local accounts_list = Div{parent=accounts_page, x=2, y=2, width=term_w-2}
+    local account_list = ListBox{parent=accounts_page, x=2, y=2, width=term_w-2, scroll_height=1000}
 
     local panes = { main_page, accounts_page }
 
@@ -98,7 +98,7 @@ local function init(panel)
 
     TabBar{parent=panel, y=2, tabs=tabs, min_width=7, callback=page_pane.set_value, fg_bg=style.theme.highlight_box_bright}
 
-    pgi.link_element(accounts_list, account_entry)
+    pgi.link_elements(account_list, account_entry)
 end
 
 return init
