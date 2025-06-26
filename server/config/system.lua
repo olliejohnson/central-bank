@@ -1,6 +1,6 @@
-local log         = require("scada-common.log")
-local types       = require("scada-common.types")
-local util        = require("scada-common.util")
+local log         = require("cb-common.log")
+local types       = require("cb-common.types")
+local util        = require("cb-common.util")
 
 local core        = require("graphics.core")
 local themes      = require("graphics.themes")

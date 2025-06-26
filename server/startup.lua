@@ -15,7 +15,7 @@ local server = require "server.server"
 local renderer = require "server.renderer"
 
 ---@diagnostic disable-next-line:unused-local
-local SERVER_VERSION = "v0.0.1-alpha"
+local SERVER_VERSION = "v0.0.2-alpha"
 
 local println = util.println
 local println_ts = util.print_ts
