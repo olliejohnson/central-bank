@@ -75,11 +75,11 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
             tmp_cfg.LogDebug = en_dbg.get_value()
             tool_ctl.color_apply.hide(true)
             tool_ctl.color_next.show()
-            main_pane.set_value(4)
+            main_pane.set_value(3)
         else path_err.show() end
     end
 
-    PushButton{parent=log_c_1,x=1,y=14,text="\x1b Back",callback=function()main_pane.set_value(2)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+    PushButton{parent=log_c_1,x=1,y=14,text="\x1b Back",callback=function()main_pane.set_value(1)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
     PushButton{parent=log_c_1,x=44,y=14,text="Next \x1a",callback=submit_log,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
 
     --#endregion
@@ -138,7 +138,7 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
     PushButton{parent=clr_c_2,x=44,y=14,min_width=6,text="Done",callback=function()clr_pane.set_value(1)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
 
     local function back_from_colors()
-        main_pane.set_value(tri(tool_ctl.jumped_to_color, 1, 3))
+        main_pane.set_value(tri(tool_ctl.jumped_to_color, 1, 2))
         tool_ctl.jumped_to_color = false
         recolor(1)
     end
