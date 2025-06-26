@@ -67,9 +67,9 @@ local types = {}
 ---@field sendMessage fun(message: string, prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: boolean|nil|string
 ---@field sendMessageToPlayer fun(message: string, username: string, prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: true|nil|string
 ---@field sendToastToPlayer fun(message: string, title: string, username: string, prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: true|nil|string
----@field sendFormattedMessage fun(message: Message[], prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: true|nil|string
----@field sendFormattedMessageToPlayer fun(message: Message[], username: string, prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: true|nil|string
----@field sendFormattedToastToPlayer fun(message: Message[], title: Message[], username: string, prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: true|nil|string
+---@field sendFormattedMessage fun(message: Message[]|Message, prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: true|nil|string
+---@field sendFormattedMessageToPlayer fun(message: Message[]|Message, username: string, prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: true|nil|string
+---@field sendFormattedToastToPlayer fun(message: Message[]|Message, title: Message[]|Message, username: string, prefix?: string, brackets?: string, bracketColor?: string, range?: number) : status: true|nil|string
 
 --#endregion
 
