@@ -6,6 +6,8 @@ local log = require "cb-common.log"
 local tcd = require "cb-common.tcd"
 local util = require "cb-common.util"
 
+local system = require "server.config.system"
+
 local core = require "graphics.core"
 local themes = require "graphics.themes"
 
@@ -175,7 +177,13 @@ local function config_view(display)
 
     local settings = { settings_cfg, ini_cfg, fields, load_settings }
 
-      --#region Config Change Log
+    --#region System Configuration
+
+    local divs = { log_cfg, clr_cfg, summary, import_err }
+
+    system.create(tool_ctl, main_pane, settings, divs, style, exit)
+
+    --#region Config Change Log
 
     local cl = Div{parent=changelog,x=2,y=4,width=49}
 
