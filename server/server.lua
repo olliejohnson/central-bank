@@ -65,7 +65,7 @@ function server.comms(_version, nic, fp_ok)
         last_est_acks = {}
     }
 
-    comms.set_trused_range(config.TrustedRange)
+    comms.set_trusted_range(config.TrustedRange)
 
     -- PRIVATE FUNCTIONS --
 
