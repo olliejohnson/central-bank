@@ -32,7 +32,7 @@ local function log_versions(log_msg)
     log_msg(util.c("LUA VERSION:      ", _VERSION))
     log_msg(util.c("APPLICATION:      ", app))
     log_msg(util.c("FIRMWARE VERSION: ", ver))
-    if has_graphics then log_msg(util.c("GRAPHICS VERSiON ", core.version)) end
+    if has_graphics then log_msg(util.c("GRAPHICS VERSION: ", core.version)) end
 end
 
 -- render the standard computer crash screen

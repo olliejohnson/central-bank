@@ -30,6 +30,14 @@ function server.load_config()
         server.boot_state = boot_state
     end
 
+    config.SVR_Channel = settings.get("SVR_Channel")
+    config.CLI_Channel = settings.get("CLI_Channel")
+
+    config.CLI_Timeout = settings.get("CLI_Timeout")
+
+    config.AuthKey = settings.get("AuthKey")
+    config.TrustedRange = settings.get("TrustedRange")
+
     config.LogMode = settings.get("LogMode")
     config.LogPath = settings.get("LogPath")
     config.LogDebug = settings.get("LogDebug")

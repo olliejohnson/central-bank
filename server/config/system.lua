@@ -451,6 +451,9 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
         local alternate = false
         local inner_width = setting_list.get_width() - 1
 
+        self.show_key_btn.enable()
+        self.auth_key_value = cfg.AuthKey or "" -- to show auth key
+
         for i = 1, #fields do
             local f = fields[i]
             local height = 1
