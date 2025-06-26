@@ -151,7 +151,7 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
         local v = key.get_value()
         if string.len(v) == 0 or string.len(v) >= 8 then
             tmp_cfg.AuthKey = key.get_value()
-            main_pane.set_value(4)
+            main_pane.set_value(3)
             key_err.hide(true)
         else key_err.show() end
     end
@@ -435,6 +435,12 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
         sum_pane.set_value(1)
         main_pane.set_value(6)
         self.importing_legacy = true
+    end
+
+    -- expose auth key on the summary page
+    function self.show_auth_key()
+        self.show_key_btn.disable()
+        self.auth_key_textbox.set_value(self.auth_key_value)
     end
 
     -- generate the summary list
