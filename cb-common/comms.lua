@@ -28,6 +28,9 @@ local PROTOCOL = {
 ---@enum CLI_TYPES
 local CLI_TYPES = {
     STATUS = 0, -- system status
+    KEEP_ALIVE = 1,
+    ESTABLISH = 2,
+    CLOSE = 3
 }
 
 ---@enum ESTABLISH_ACK

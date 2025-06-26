@@ -1,5 +1,6 @@
 require("/initenv").init_env()
 local network = require("cb-common.network")
+local svsessions = require("session.svsessions")
 
 local crash = require "cb-common.crash"
 local log = require "cb-common.log"
@@ -159,6 +160,10 @@ local function main()
 
             loop_clock.start()
         elseif event == "timer" then
+            -- a non-clock timer event, check watchdogs
+            svsessions.check_all_watchdogs(param1)
+
+            -- notify timer callback dispatcher
             tcd.handle(param1)
         elseif event == "modem_message" then
             -- got a packet
@@ -170,6 +175,10 @@ local function main()
 
         -- check for termination request
         if event == "terminate" or ppm.should_terminate() then
+            println_ts("closing sessions...")
+            log.info("terminate requested, closing session...")
+            svsessions.close_all()
+            log.info("sessions closed")
             break
         end
     end

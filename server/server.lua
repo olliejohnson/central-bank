@@ -1,6 +1,7 @@
 local log = require "cb-common.log"
 local util = require "cb-common.util"
 local comms = require "cb-common.comms"
+local svsessions = require "session.svsessions"
 
 local themes = require "graphics.themes"
 
@@ -143,10 +144,55 @@ function server.comms(_version, nic, fp_ok)
                 if session ~= nil then
                     -- pass the packet onto the session handler
                     session.in_queue.push_packet(packet)
+                elseif packet.type == CLI_TYPES.ESTABLISH then
+                    -- establish a new session
+                    local last_ack = self.last_est_acks[src_addr]
+
+                    -- validate packet and continue
+                    if packet.length >= 3 and type(packet.data[1]) == "string" and type(packet.data[2]) == "string" then
+                        local comms_v = packet.data[1]
+                        local firmware_v = packet.data[2]
+                        local dev_type = packet.data[3]
+
+                        if comms_v ~= comms.version then
+                            if last_ack ~= ESTABLISH_ACK.BAD_VERSION then
+                                log.info(util.c("dropping CLI establish packet with incorrect comms version v", comms_v, " (expected v", comms.version, ")"))
+                            end
+
+                            _send_establish(packet.frame, ESTABLISH_ACK.BAD_VERSION)
+                        elseif dev_type == DEVICE_TYPE.CLI then
+                            -- CLI linking request
+                            if packet.length == 3 then
+                                local cli_id = svsessions.establish_cli_session(src_addr, i_seq_num, firmware_v)
+
+                                if cli_id == false then
+                                    -- already established
+                                    if last_ack ~= ESTABLISH_ACK.COLLISION then
+                                        log.warning(util.c("CLI_ESTABLISH: assignment collision"))
+                                    end
+
+                                    _send_establish(packet.frame, ESTABLISH_ACK.COLLISION)
+                                else
+                                    -- got an ID
+                                    println(util.c("CLI (", firmware_v, ") [@", src_addr, "] connected"))
+                                    log.info(util.c("CLI_ESTABLISH: CLI (", firmware_v, ") [@", src_addr, "] connected with session ID ", cli_id))
+                                    _send_establish(packet.frame, ESTABLISH_ACK.ALLOW)
+                                end
+                            end
+                        else
+                            log.debug(util.c("illegal establish packet for device ", dev_type, " on CLI channel"))
+                            _send_establish(packet.frame, ESTABLISH_ACK.DENY)
+                        end
+                    else
+                        log.debug("invalid establish packet (on CLI channel)")
+                        _send_establish(packet.frame, ESTABLISH_ACK.DENY)
+                    end
                 else
                     -- any other packet onto the server related, discard it
                     log.debug("discarding CLI packet without a known session")
                 end
+            else
+                log.debug(util.c("illegal packet type ", protocol, " on CLI channel"))
             end
         else
             log.debug("received packet for unknown channel " .. r_chan, true)

@@ -15,7 +15,8 @@ local mqueue = {}
 ---@enum MQ_TYPE
 local TYPE = {
     COMMAND = 0,
-    DATA = 1
+    DATA = 1,
+    PACKET = 2
 }
 
 mqueue.TYPE = TYPE
@@ -58,6 +59,10 @@ function mqueue.now()
     ---@param key any
     ---@param value any
     function public.push_data(key, value) _push(TYPE.DATA, { key = key, val = value }) end
+
+    -- push packet onto the queue
+    ---@param packet packet|frame
+    function public.push_packet(packet) _push(TYPE.PACKET, packet) end
 
     -- get an item off the queue
     ---@nodiscard
