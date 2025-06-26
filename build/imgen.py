@@ -46,7 +46,7 @@ def get_version(path, is_lib = False):
 def make_manifest(size):
     manifest = {
         "versions" : {
-            "installer" : get_version("./cbin.lua"),
+            "installer" : get_version("./cbins.lua"),
             "bootloader" : get_version("./startup.lua"),
             "common" : get_version("./cb-common/util.lua", True),
             "graphics" : get_version("./graphics/core.lua", True),
