@@ -1,4 +1,5 @@
 require("/initenv").init_env()
+local network = require("cb-common.network")
 
 local crash = require "cb-common.crash"
 local log = require "cb-common.log"
@@ -59,6 +60,11 @@ local function main()
     -- mount connected devices
     ppm.mount_all()
 
+    -- message authentication init
+    if type(config.AuthKey) == "string" and string.len(config.AuthKey) > 0 then
+        network.init_mac(config.AuthKey)
+    end
+
     -- get modem
     local modem = ppm.get_wireless_modem()
     if modem == nil then
@@ -79,6 +85,10 @@ local function main()
         -- redefine println_ts local to not print as we have the front panel running
         println_ts = function(_) end
     end
+
+    -- create network interface then setup comms
+    local nic = network.nic(modem)
+    local server_comms = server.comms(SERVER_VERSION, nic, fp_ok)
 
     -- base loop clock (6.67hz, 3 ticks)
     local MAIN_CLOCK = 0.15
@@ -102,7 +112,22 @@ local function main()
                 if type == "modem" then
                     ---@cast device Modem
                     -- we only care if this is our wireless modem
-                    databus.tx_hw_modem(false)
+                    if nic.is_modem(device) then
+                        nic.disconnect()
+
+                        println_ts("wireless modem disconnected!")
+                        log.warning("comms modem diconnected")
+
+                        local other_modem = ppm.get_wireless_modem()
+                        if other_modem then
+                            log.info("found another wireless modem, using it for comms")
+                            nic.connect(other_modem)
+                        else
+                            databus.tx_hw_modem(false)
+                        end
+                    end
+                else
+                    log.warning("non-comms modem disconnected")
                 end
             end
         elseif event == "peripheral" then
@@ -111,8 +136,18 @@ local function main()
             if type ~= nil and device ~= nil then
                 if type == "modem" then
                     ---@cast device Modem
-                    if device.isWireless() then
+                    if device.isWireless() and not nic.is_connected() then
+                        -- reconnected modem
+                        nic.connect(device)
+
+                        println_ts("wireless modem reconnected.")
+                        log.info("comms modem reconnected")
+
                         databus.tx_hw_modem(true)
+                    elseif device.isWireless() then
+                        log.info("unused wireless modem reconnected")
+                    else
+                        log.info("wired modem reconnected")
                     end
                 end
             end
@@ -127,6 +162,8 @@ local function main()
             tcd.handle(param1)
         elseif event == "modem_message" then
             -- got a packet
+            local packet = server_comms.parse_packet(param1, param2, param3, param4, param5)
+            if packet then server_comms.handle_packet(packet) end
         elseif event == "mouse_click" or event == "mouse_up" or event == "mouse_drag" or event == "mouse_scroll" or event == "double_click" then
             renderer.handle_mouse(core.events.new_mouse_event(event, param1, param2, param3))
         end

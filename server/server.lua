@@ -1,5 +1,6 @@
 local log = require "cb-common.log"
 local util = require "cb-common.util"
+local comms = require "cb-common.comms"
 
 local themes = require "graphics.themes"
 
@@ -48,6 +49,111 @@ function server.load_config()
     cfv.assert_range(config.ColorMode, 1, themes.COLOR_MODE.NUM_MODES)
 
     return cfv.valid()
+end
+
+-- server communications
+---@nodiscard
+---@param _version string server version
+---@param nic nic network interface device
+---@param fp_ok boolean if the front panel UI is running
+function server.comms(_version, nic, fp_ok)
+    -- print a log message to the terminal as long as the ui isn't running
+    local function println(message) if not fp_ok then util.println_ts(message) end end
+
+    local self = {
+        last_est_acks = {}
+    }
+
+    comms.set_trused_range(config.TrustedRange)
+
+    -- PRIVATE FUNCTIONS --
+
+    -- configure modem channels
+    nic.closeAll()
+    nic.open(config.SVR_Channel)
+
+    -- pass system data and objects to svsessions
+    svsessions.init(nic, fp_ok, config)
+
+    -- send an establish request response
+    ---@param packet packet
+    ---@param ack ESTABLISH_ACK
+    ---@param data? any optional data
+    local function _send_establish(packet, ack, data)
+        local s_pkt = comms.packet()
+        local c_pkt = comms.cli_packet()
+
+        c_pkt.make(CLi_TYPES.ESTABLISH, { ack, data })
+        s_pkt.make(packet.src_addr(), packet.seq_num() + 1, PROTOCOL.C_PROTO, c_pkt.raw_sendable())
+
+        nic.transmit(packet.remote_channel(), config.SVR_Channel, s_pkt)
+        self.last_est_acks[packet.src_addr()] = ack
+    end
+
+    -- PUBLIC FUNCTIONS --
+
+    ---@class server_comms
+    local public = {}
+
+    -- parse a packet
+    ---@nodiscard
+    ---@param side string
+    ---@param sender integer
+    ---@param reply_to integer
+    ---@param message any
+    ---@param distance integer
+    ---@return cli_frame|nil packet
+    function public.parse_packet(side, sender, reply_to, message, distance)
+        local s_pkt = nic.receive(side, sender, reply_to, message, distance)
+        local pkt = nil
+
+        if s_pkt then
+            -- get C Packet
+            if s_pkt.protocol() == PROTOCOL.C_PROTO then
+                local cli_pkt = comms.cli_packet()
+                if cli_pkt.decode(s_pkt) then
+                    pkt = cli_pkt.get()
+                end
+            else
+                log.debug("attempted parse of illegal packet type " .. s_pkt.protocol(), true)
+            end
+        end
+        
+        return pkt
+    end
+
+    -- handle a packet
+    ---@param packet cli_frame
+    function public.handle_packet(packet)
+        local l_chan = packet.frame.local_channel()
+        local r_chan = packet.frame.remote_channel()
+        local src_addr = packet.frame.src_addr()
+        local protocol = packet.frame.protocol()
+        local i_seq_num = packet.frame.seq_num()
+
+        if l_chan ~= config.SVR_Channel then
+            log.debug("received packet on unconfigured channel " .. l_chan, true)
+        elseif r_chan == config.CLI_Channel then
+            -- look for an associated session
+            local session = svsessions.find_cli_session(src_addr)
+
+            if protocol == PROTOCOL.C_PROTO then
+                ---@cast packet cli_frame
+                -- client packet
+                if session ~= nil then
+                    -- pass the packet onto the session handler
+                    session.in_queue.push_packet(packet)
+                else
+                    -- any other packet onto the server related, discard it
+                    log.debug("discarding CLI packet without a known session")
+                end
+            end
+        else
+            log.debug("received packet for unknown channel " .. r_chan, true)
+        end
+    end
+
+    return public
 end
 
 return server

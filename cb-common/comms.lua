@@ -359,7 +359,7 @@ function comms.cli_packet()
     -- get this packet as a frame with an immutable relation to this object
     ---@nodiscard
     function public.get()
-        ---@class rplc_frame
+        ---@class cli_frame
         local frame = {
             frame = self.frame,
             id = self.id,

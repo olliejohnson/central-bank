@@ -26,7 +26,12 @@ local cpair = core.cpair
 local RIGHT = core.ALIGN.RIGHT
 
 local self = {
-    importing_legacy = false
+    importing_legacy = false,
+
+    show_auth_key = nil, ---@type function
+    show_key_btn = nil, ---@type function
+    auth_key_textbox = nil, ---@type TextBox
+    auth_key_value = ""
 }
 
 local system = {}
@@ -40,13 +45,121 @@ local system = {}
 ---@param exit function
 function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
     local settings_cfg, ini_cfg, tmp_cfg, fields, load_settings = cfg_sys[1], cfg_sys[2], cfg_sys[3], cfg_sys[4], cfg_sys[5]
-    local log_cfg, clr_cfg, summary, import_err = divs[1], divs[2], divs[3], divs[4]
+    local net_cfg, log_cfg, clr_cfg, summary, import_err = divs[1], divs[2], divs[3], divs[4], divs[5]
 
     local bw_fg_bg = style.bw_fg_bg
     local g_lg_fg_bg    = style.g_lg_fg_bg
     local nav_fg_bg     = style.nav_fg_bg
     local btn_act_fg_bg = style.btn_act_fg_bg
     local btn_dis_fg_bg = style.btn_dis_fg_bg
+
+    --#region Network
+
+    local net_c_1 = Div{parent=net_cfg,x=2,y=4,width=49}
+    local net_c_2 = Div{parent=net_cfg,x=2,y=4,width=49}
+    local net_c_3 = Div{parent=net_cfg,x=2,y=4,width=49}
+    local net_c_4 = Div{parent=net_cfg,x=2,y=4,width=49}
+
+    local net_pane = MultiPane{parent=net_cfg,x=1,y=4,panes={net_c_1,net_c_2,net_c_3,net_c_4}}
+
+    TextBox{parent=net_cfg,x=1,y=2,text=" Network Configuration",fg_bg=cpair(colors.black,colors.lightBlue)}
+
+    TextBox{parent=net_c_1,x=1,y=1,text="Please set the network channels below."}
+    TextBox{parent=net_c_1,x=1,y=3,height=4,text="Each of the 2 uniquely named channels must be the same for each device in this network. For multiplayer servers, it is recommedec to not use the default channels.",fg_bg=g_lg_fg_bg}
+
+    TextBox{parent=net_c_1,x=1,y=8,width=18,text="Server Channel"}
+    local svr_chan = NumberField{parent=net_c_1,x=21,y=8,width=7,default=ini_cfg.SVR_Channel,min=1,max=65535,fg_bg=bw_fg_bg}
+    TextBox{parent=net_c_1,x=29,y=8,text="[SVR_CHANNEL]",fg_bg=g_lg_fg_bg}
+
+    TextBox{parent=net_c_1,x=1,y=9,width=11,text="CLI Channel"}
+    local cli_chan = NumberField{parent=net_c_1,x=21,y=9,width=7,default=ini_cfg.CLI_Channel,min=1,max=65535,fg_bg=bw_fg_bg}
+    TextBox{parent=net_c_1,x=29,y=9,height=4,text="[CLI_CHANNEL]",fg_bg=g_lg_fg_bg}
+
+    local chan_err = TextBox{parent=net_c_1, x=8, y=14, width=35, text="Please set all channels.", fg_bg=cpair(colors.red, colors.lightGray), hidden=true}
+
+    local function submit_channels()
+        local svr_c, cli_c = tonumber(svr_chan.get_value()), tonumber(cli_chan.get_value())
+        
+        if svr_c ~= nil and cli_c ~= nil then
+            tmp_cfg.SVR_Channel, tmp_cfg.CLI_Channel = svr_c, cli_c
+            net_pane.set_value(2)
+            chan_err.hide(true)
+        else chan_err.show() end
+    end
+
+    PushButton{parent=net_c_1,x=1,y=14,text="\x1b Back",callback=function()main_pane.set_value(2)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+    PushButton{parent=net_c_1,x=44,y=14,text="Next \x1a",callback=submit_channels,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+
+    TextBox{parent=net_c_2,x=1,y=1,text="Please set the connection timeouts below."}
+    TextBox{parent=net_c_2,x=1,y=3,height=4,text="You generally should not need to modify these. On slow servers, you can try to increase this to make the system wait longer before assuming a disconnection. The default for all is 5 seconds.",fg_bg=g_lg_fg_bg}
+
+    TextBox{parent=net_c_2,x=1,y=8,width=11,text="CLI Timeout"}
+    local cli_timeout = NumberField{parent=net_c_2,x=21,y=8,width=7,default=ini_cfg.CLI_Timeout,min=2,max=25,max_chars=6,max_frac_digits=2,allow_decimal=true,fg_bg=bw_fg_bg}
+
+    TextBox{parent=net_c_2,x=29,y=8,height=4,width=7,text="seconds\nseconds\nseconds\nseconds",fg_bg=g_lg_fg_bg}
+
+    local ct_err = TextBox{parent=net_c_2,x=8,y=14,width=35,text="Please set all connection timeouts.",fg_bg=cpair(colors.red,colors.lightGray),hidden=true}
+
+    local function submit_timeouts()
+        local cli_cto = tonumber(cli_timeout.get_value())
+        if cli_cto ~= nil then
+            tmp_cfg.CLI_Timeout = cli_cto
+            net_pane.set_value(3)
+            ct_err.hide(true)
+        else ct_err.show() end
+    end
+
+    PushButton{parent=net_c_2,x=1,y=14,text="\x1b Back",callback=function()net_pane.set_value(1)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+    PushButton{parent=net_c_2,x=44,y=14,text="Next \x1a",callback=submit_timeouts,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+
+    TextBox{parent=net_c_3,x=1,y=1,text="Please set the trusted range below."}
+    TextBox{parent=net_c_3,x=1,y=3,height=3,text="Setting this to a value larger than 0 prevents connections with devices that many meters (blocks) away in any direction.",fg_bg=g_lg_fg_bg}
+    TextBox{parent=net_c_3,x=1,y=7,height=2,text="This is optional. You can disable this functionality by setting the value to 0.",fg_bg=g_lg_fg_bg}
+
+    local range = NumberField{parent=net_c_3,x=1,y=10,width=10,default=ini_cfg.TrustedRange,min=0,max_chars=20,allow_decimal=true,fg_bg=bw_fg_bg}
+
+    local tr_err = TextBox{parent=net_c_3,x=8,y=14,width=35,text="Please set the trusted range.",fg_bg=cpair(colors.red,colors.lightGray),hidden=true}
+
+    local function submit_tr()
+        local range_val = tonumber(range.get_value())
+        if range_val ~= nil then
+            tmp_cfg.TrustedRange = range_val
+            net_pane.set_value(4)
+            tr_err.hide(true)
+        else tr_err.show() end
+    end
+
+    PushButton{parent=net_c_3,x=1,y=14,text="\x1b Back",callback=function()net_pane.set_value(2)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+    PushButton{parent=net_c_3,x=44,y=14,text="Next \x1a",callback=submit_tr,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+
+    TextBox{parent=net_c_4,x=1,y=1,height=2,text="Optionally, set the network authentication key below. Do NOT use one of your passwords."}
+    TextBox{parent=net_c_4,x=1,y=4,height=6,text="This enables verifying that messages are authentic, so it is intended for security on multiplayer servers. All devices on the same network MUST use the same key if any device has a key. This does result in some extra computation (can slow things down).",fg_bg=g_lg_fg_bg}
+
+    TextBox{parent=net_c_4,x=1,y=11,text="Auth Key"}
+    local key, _ = TextField{parent=net_c_4,x=1,y=12,max_len=64,value=ini_cfg.AuthKey,width=32,height=1,fg_bg=bw_fg_bg}
+
+    local function censor_key(enable) key.censor(tri(enable, "*", nil)) end
+
+    local hide_key = Checkbox{parent=net_c_4,x=34,y=12,label="Hide",box_fg_bg=cpair(colors.lightBlue,colors.black),callback=censor_key}
+
+    hide_key.set_value(true)
+    censor_key(true)
+
+    local key_err = TextBox{parent=net_c_4,x=8,y=14,width=35,text="Key must be at least 8 characters.",fg_bg=cpair(colors.red,colors.lightGray),hidden=true}
+
+    local function submit_auth()
+        local v = key.get_value()
+        if string.len(v) == 0 or string.len(v) >= 8 then
+            tmp_cfg.AuthKey = key.get_value()
+            main_pane.set_value(4)
+            key_err.hide(true)
+        else key_err.show() end
+    end
+
+    PushButton{parent=net_c_4,x=1,y=14,text="\x1b Back",callback=function()net_pane.set_value(3)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+    PushButton{parent=net_c_4,x=44,y=14,text="Next \x1a",callback=submit_auth,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+
+    --#endregion
 
     --#region Logging
 
@@ -75,11 +188,11 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
             tmp_cfg.LogDebug = en_dbg.get_value()
             tool_ctl.color_apply.hide(true)
             tool_ctl.color_next.show()
-            main_pane.set_value(3)
+            main_pane.set_value(4)
         else path_err.show() end
     end
 
-    PushButton{parent=log_c_1,x=1,y=14,text="\x1b Back",callback=function()main_pane.set_value(1)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+    PushButton{parent=log_c_1,x=1,y=14,text="\x1b Back",callback=function()main_pane.set_value(2)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
     PushButton{parent=log_c_1,x=44,y=14,text="Next \x1a",callback=submit_log,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
 
     --#endregion
@@ -138,7 +251,7 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
     PushButton{parent=clr_c_2,x=44,y=14,min_width=6,text="Done",callback=function()clr_pane.set_value(1)end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
 
     local function back_from_colors()
-        main_pane.set_value(tri(tool_ctl.jumped_to_color, 1, 2))
+        main_pane.set_value(tri(tool_ctl.jumped_to_color, 1, 3))
         tool_ctl.jumped_to_color = false
         recolor(1)
     end
@@ -168,7 +281,7 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
             tool_ctl.viewing_config = false
             self.importing_legacy = false
             tool_ctl.settings_apply.show()
-            main_pane.set_value(4)
+            main_pane.set_value(5)
         end
     end
 
@@ -234,6 +347,11 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
             load_settings(settings_cfg, true)
             load_settings(ini_cfg)
 
+            try_set(svr_chan, ini_cfg.SVR_Channel)
+            try_set(cli_chan, ini_cfg.CLI_Channel)
+            try_set(cli_timeout, ini_cfg.CLI_Timeout)
+            try_set(range, ini_cfg.TrustedRange)
+            try_set(key, ini_cfg.AuthKey)
             try_set(mode, ini_cfg.LogMode)
             try_set(path, ini_cfg.LogPath)
             try_set(en_dbg, ini_cfg.LogDebug)
@@ -254,6 +372,7 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
     end
 
     PushButton{parent=sum_c_1,x=1,y=14,text="\x1b Back",callback=back_from_settings,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg}
+    self.show_key_btn = PushButton{parent=sum_c_1,x=8,y=14,min_width=17,text="Unhide Auth Key",callback=function()self.show_auth_key()end,fg_bg=nav_fg_bg,active_fg_bg=btn_act_fg_bg,dis_fg_bg=btn_dis_fg_bg}
     tool_ctl.settings_apply = PushButton{parent=sum_c_1,x=43,y=14,min_width=7,text="Apply",callback=save_and_continue,fg_bg=cpair(colors.black,colors.green),active_fg_bg=btn_act_fg_bg}
 
     TextBox{parent=sum_c_2,x=1,y=1,text="Settings saved!"}
@@ -303,6 +422,11 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
     function tool_ctl.load_legacy()
         local config = require("server.config")
 
+        tmp_cfg.SVR_Channel = config.SVR_CHANNEL
+        tmp_cfg.CLI_Channel = config.CLI_CHANNEL
+        tmp_cfg.CLI_Timeout = config.CLI_TIMEOUT
+        tmp_cfg.TrustedRange = config.TRUSTED_RANGE
+        tmp_cfg.AuthKey = config.AUTH_KEY
         tmp_cfg.LogMode = config.LOG_MODE
         tmp_cfg.LogPath = config.LOG_PATH
         tmp_cfg.LogDebug = config.LOG_DEBUG or false
@@ -330,7 +454,8 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
             local val = util.strval(raw)
             local skip = false
 
-            if f[1] == "LogMode" then val = tri(raw == log.MODE.APPEND, "append", "replace")
+            if f[1] == "AuthKey" then val = string.rep("*", string.len(val))
+            elseif f[1] == "LogMode" then val = tri(raw == log.MODE.APPEND, "append", "replace")
             elseif f[1] == "FrontPanelTheme" then
                 val = util.strval(themes.fp_theme_name(raw))
             elseif f[1] == "ColorMode" then
@@ -357,6 +482,8 @@ function system.create(tool_ctl, main_pane, cfg_sys, divs, style, exit)
                 else
                     textbox = TextBox{parent=line,x=label_w+1,y=1,text=val,alignment=RIGHT}
                 end
+
+                if f[1] == "AuthKey" then self.auth_key_textbox = textbox end
             end
         end
     end

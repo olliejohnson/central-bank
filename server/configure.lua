@@ -60,10 +60,18 @@ local tool_ctl = {
     color_next = nil,     ---@type PushButton
     color_apply = nil,    ---@type PushButton
     settings_apply = nil, ---@type PushButton
+
+    gen_summary = nil, ---@type function
+    load_legacy = nil, ---@type function
 }
 
 ---@class svr_config
 local tmp_cfg = {
+    SVR_Channel = nil, ---@type integer
+    CLI_Channel = nil, ---@type integer
+    CLI_Timeout = nil, ---@type integer
+    TrustedRange = nil, ---@type number
+    AuthKey = nil, ---@type string|nil
     LogMode = 0, ---@type LOG_MODE
     LogPath = "",
     LogDebug = false,
@@ -78,6 +86,11 @@ local settings_cfg = {}
 
 -- all settings fields, their nice names, and their default values
 local fields = {
+    { "SVR_Channel", "SVR Channel", 16240 },
+    { "CLI_Channel", "CLI Channel", 16241 },
+    { "CLI_Timeout", "CLI Timeout", 5 },
+    { "TrustedRange", "Trusted Range", 0 },
+    { "AuthKey", "Auth Key", "" },
     { "LogMode", "Log Mode", log.MODE.APPEND },
     { "LogPath", "Log Path", "/log.txt" },
     { "LogDebug", "Log Debug", false },
@@ -115,6 +128,7 @@ local function config_view(display)
     local root_pane_div = Div{parent=display,x=1,y=2}
 
     local main_page = Div{parent=root_pane_div,x=1,y=1}
+    local net_cfg = Div{parent=root_pane_div,x=1,y=1}
     local log_cfg = Div{parent=root_pane_div,x=1,y=1}
     local clr_cfg = Div{parent=root_pane_div,x=1,y=1}
     local summary = Div{parent=root_pane_div,x=1,y=1}
@@ -179,7 +193,7 @@ local function config_view(display)
 
     --#region System Configuration
 
-    local divs = { log_cfg, clr_cfg, summary, import_err }
+    local divs = { net_cfg, log_cfg, clr_cfg, summary, import_err }
 
     system.create(tool_ctl, main_pane, settings, divs, style, exit)
 
