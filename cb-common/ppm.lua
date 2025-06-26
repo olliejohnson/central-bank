@@ -40,10 +40,10 @@ local function peri_init(iface)
     local self = {
         faulted = false,
         last_fault = "",
-        fault_counts = {}, ---@type { [string]: integer }
+        fault_counts = {},          ---@type { [string]: integer }
         auto_cf = true,
         type = VIRTUAL_DEVICE_TYPE, ---@type string
-        device = {} ---@type { [string]: function }
+        device = {}                 ---@type { [string]: function }
     }
 
     if iface ~= "__virtual__" then
@@ -51,9 +51,9 @@ local function peri_init(iface)
         self.device = peripheral.wrap(iface)
     end
 
-    -- create a protected version of peripheral function call
+    -- create a protected version of a peripheral function call
     ---@nodiscard
-    ---@param key string function_name
+    ---@param key string function name
     ---@param func function function
     ---@return function method protected version of the function
     local function protect_peri_function(key, func)
@@ -75,7 +75,7 @@ local function peri_init(iface)
                 local result = return_table[1]
 
                 -- function failed
-                self.faulted  = true
+                self.faulted = true
                 self.last_fault = result
 
                 ppm_sys.faulted = true
@@ -94,12 +94,12 @@ local function peri_init(iface)
 
                 if result == "Terminated" then ppm_sys.terminate = true end
 
-                return ACCESS_FAULT. result
+                return ACCESS_FAULT, result
             end
         end
     end
 
-    --initalization process (re-map)
+    -- initialization process (re-map)
     for key, func in pairs(self.device) do
         self.fault_counts[key] = 0
         self.device[key] = protect_peri_function(key, func)
@@ -113,7 +113,7 @@ local function peri_init(iface)
     local function is_ok() return not self.faulted end
 
     -- check if a peripheral has any faulted functions<br>
-    -- contrasted with is_faulted() and is_ok() as those only check if the last opertation failed,
+    -- contrasted with is_faulted() and is_ok() as those only check if the last operation failed,
     -- unless auto fault clearing is disabled, at which point faults become sticky faults
     local function is_healthy()
         for _, v in pairs(self.fault_counts) do if v > 0 then return false end end
@@ -126,7 +126,7 @@ local function peri_init(iface)
     -- append PPM functions to device functions
 
     self.device.__p_clear_fault = clear_fault
-    self.device.__p_last_fault = get_last_fault
+    self.device.__p_last_fault  = get_last_fault
     self.device.__p_is_faulted  = is_faulted
     self.device.__p_is_ok       = is_ok
     self.device.__p_is_healthy  = is_healthy
@@ -137,21 +137,22 @@ local function peri_init(iface)
 
     local mt = {
         __index = function (_, key)
-            -- try to find the function in case it was added
+            -- try to find the function in case it was added (multiblock formed)
             local funcs = peripheral.wrap(iface)
             if (type(funcs) == "table") and (type(funcs[key]) == "function") then
-                -- add this function the return it
+                -- add this function then return it
                 self.fault_counts[key] = 0
                 self.device[key] = protect_peri_function(key, funcs[key])
 
-                log.info(util.c("PPM: [@", iface, "] initalized previously undefined field ", key, "()"))
+                log.info(util.c("PPM: [@", iface, "] initialized previously undefined field ", key, "()"))
 
                 return self.device[key]
             end
 
-            -- function is still missing, return an undefined function handler
+            -- function still missing, return an undefined function handler
+            -- note: code should avoid storing functions for multiblocks and instead try to index them again
             return (function ()
-                -- this will continusly be counting calls here as faults
+                -- this will continuously be counting calls here as faults
                 if self.fault_counts[key] == nil then self.fault_counts[key] = 0 end
 
                 -- function failed
@@ -227,9 +228,6 @@ function ppm.should_terminate() return ppm_sys.terminate end
 -- mount all available peripherals (clears mounts first)
 function ppm.mount_all()
     local ifaces = peripheral.getNames()
-
-    local pretty = require "cc.pretty"
-    log.debug(pretty.pretty_print(ifaces), false)
 
     ppm_sys.mounts = {}
 
