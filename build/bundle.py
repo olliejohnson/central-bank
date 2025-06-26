@@ -72,7 +72,9 @@ manifest = {
     "common_versions": {
         "bootloader": get_version("./startup.lua"),
         "common": get_version("./cb-common/util.lua", True),
-        "graphics": get_version("./graphics/core.lua", True)
+        "comms": get_version("./cb-common/comms.lua", True),
+        "graphics": get_version("./graphics/core.lua", True),
+        "lockbox": get_version("./lockbox/init.lua", True)
     },
     "app_versions": {
         "server": get_version("./server/startup.lua"),
@@ -81,8 +83,7 @@ manifest = {
         "system": encode_files([ "initenv.lua", "startup.lua", "configure.lua", "LICENSE" ]),
         "cb-common": encode_recursive(path_prefix + "./cb-common"),
         "graphics": encode_recursive(path_prefix + "./graphics"),
-        "ccryptolib": encode_recursive(path_prefix + "./ccryptolib"),
-        "ecnet2": encode_recursive(path_prefix + "./ecnet2"),
+        "lockbox": encode_recursive(path_prefix + "./lockbox"),
         "server": encode_recursive(path_prefix + "./server")
     },
     "install_files": {
@@ -90,10 +91,11 @@ manifest = {
         "system": [ "initenv.lua", "startup.lua", "configure.lua", "LICENSE" ],
         "cb-common": list_files("./cb-common"),
         "graphics": list_files("./graphics"),
+        "lockbox": list_files("./lockbox"),
         # platform files
         "server": list_files("./cb-server"),
     },
-    "depends": [ "system", "cb-common", "graphics", "ccryptolib", "ecnet2" ]
+    "depends": [ "system", "cb-common", "graphics", "lockbox" ]
 }
 
 # write the application installation items as Lua tables

@@ -49,7 +49,9 @@ def make_manifest(size):
             "installer" : get_version("./cbins.lua"),
             "bootloader" : get_version("./startup.lua"),
             "common" : get_version("./cb-common/util.lua", True),
+            "comms" : get_version("./cb-common/comms", True),
             "graphics" : get_version("./graphics/core.lua", True),
+            "lockbox" : get_version("./lockbox/init.lua", True),
             "server": get_version("./server/startup.lua"),
         },
         "files" : {
@@ -57,13 +59,12 @@ def make_manifest(size):
             "system" : [ "initenv.lua", "startup.lua", "configure.lua", "LICENSE" ],
             "common" : list_files("./cb-common"),
             "graphics" : list_files("./graphics"),
-            "ccryptolib": list_files("./ccryptolib"),
-            "ecnet2": list_files("./ecnet2"),
+            "lockbox" : list_files("./lockbox"),
             # platform files
             "server": list_files("./server")
         },
         "depends" : {
-            "server" : [ "system", "common", "graphics", "ccryptolib", "ecnet2" ],
+            "server" : [ "system", "common", "graphics", "lockbox" ],
         },
         "sizes" : {
             # manifest file estimate
@@ -72,8 +73,7 @@ def make_manifest(size):
             "system" : os.path.getsize("initenv.lua") + os.path.getsize("startup.lua") + os.path.getsize("configure.lua"),
             "common" : dir_size("./cb-common"),
             "graphics" : dir_size("./graphics"),
-            "ccryptolib" : dir_size("./ccryptolib"),
-            "ecnet2": dir_size("./ecnet2"),
+            "lockbox" : dir_size("./lockbox"),
             # platform files
             "server": dir_size("./cb-server")
         }

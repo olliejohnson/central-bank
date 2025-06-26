@@ -398,8 +398,10 @@ elseif mode == "install" or mode == "update" then
     local ver = {
         app = { v_local = nil, v_remote = nil, changed = false },
         boot = { v_local = nil, v_remote = nil, changed = false },
+        comms = { v_local = nil, v_remote = nil, changed = false },
         common = { v_local = nil, v_remote = nil, changed = false },
-        graphics = { v_local = nil, v_remote = nil, changed = false }
+        graphics = { v_local = nil, v_remote = nil, changed = false },
+        lockbox = { v_local = nil, v_remote = nil, changed = false }
     }
 
     -- try to find local versions
@@ -411,8 +413,10 @@ elseif mode == "install" or mode == "update" then
         else
             ver.boot.v_local = l_manifest.versions.bootloader
             ver.app.v_local = l_manifest.versions[app]
+            ver.comms.v_local = l_manifest.versions.comms
             ver.common.v_local = l_manifest.versions.common
             ver.graphics.v_local = l_manifest.versions.graphics
+            ver.lockbox.v_local = l_manifest.versions.lockbox
 
             if l_manifest.versions[app] == nil then
                 red();println("Another application is already installed, please uninstall it before installing a new application.");white()
@@ -446,8 +450,10 @@ elseif mode == "install" or mode == "update" then
 
     ver.boot.v_remote = r_manifest.versions.bootloader
     ver.app.v_remote = r_manifest.versions[app]
+    ver.comms.v_remote = r_manifest.versions.comms
     ver.common.v_remote = r_manifest.versions.common
     ver.graphics.v_remote = r_manifest.versions.graphics
+    ver.lockbox.v_remote = r_manifest.versions.lockbox
 
     green()
     if mode == "install" then print("Installing ") else print("Updating ") end
@@ -455,8 +461,13 @@ elseif mode == "install" or mode == "update" then
 
     ver.boot.changed = show_pkg_change("bootldr", ver.boot)
     ver.common.changed = show_pkg_change("common", ver.common)
+    ver.comms = show_pkg_change("comms", ver.comms)
+    if ver.comms.changed and ver.comms.v_local ~= nil then
+        print("[comms] ");yellow();println("other devices on the network will require an update");white()
+    end
     ver.app.changed = show_pkg_change(app, ver.app)
     ver.graphics.changed = show_pkg_change("graphics", ver.graphics)
+    ver.lockbox.changed = show_pkg_change("lockbox", ver.lockbox)
 
     -- start install/update
 
@@ -473,7 +484,8 @@ elseif mode == "install" or mode == "update" then
     local function unchanged(dep)
         if dep == "system" then return not ver.boot.changed
         elseif dep == "graphics" then return not ver.graphics.changed
-        elseif dep == "common" then return not ver.common.changed
+        elseif dep == "lockbox" then return not ver.lockbox.changed
+        elseif dep == "common" then return not (ver.common.changed or ver.common.changed)
         elseif dep == app then return not ver.app.changed
         else return true end
     end
