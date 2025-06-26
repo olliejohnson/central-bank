@@ -49,7 +49,7 @@ def make_manifest(size):
             "installer" : get_version("./cbins.lua"),
             "bootloader" : get_version("./startup.lua"),
             "common" : get_version("./cb-common/util.lua", True),
-            "comms" : get_version("./cb-common/comms", True),
+            "comms" : get_version("./cb-common/comms.lua", True),
             "graphics" : get_version("./graphics/core.lua", True),
             "lockbox" : get_version("./lockbox/init.lua", True),
             "server": get_version("./server/startup.lua"),
