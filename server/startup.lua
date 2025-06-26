@@ -3,6 +3,7 @@ local network = require("cb-common.network")
 local svsessions = require("server.session.svsessions")
 
 local crash = require "cb-common.crash"
+local comms = require("cb-common.comms")
 local log = require "cb-common.log"
 local ppm = require "cb-common.ppm"
 local tcd = require "cb-common.tcd"
@@ -56,7 +57,7 @@ crash.dbg_log_env()
 
 local function main()
     -- startup
-    databus.tx_versions(SERVER_VERSION)
+    databus.tx_versions(SERVER_VERSION, comms.version)
 
     -- mount connected devices
     ppm.mount_all()

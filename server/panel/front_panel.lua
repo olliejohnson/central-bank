@@ -75,8 +75,10 @@ local function init(panel)
 
     local about = Div{parent=main_page, width=15, height=2, y=term_h-3, fg_bg=style.fp.disabled_fg}
     local fw_v = TextBox{parent=about, text="FW: v00.00.00"}
+    local comms_v = TextBox{parent=about, text="NT: v00.00.00"}
 
     fw_v.register(databus.ps, "version", function (version) fw_v.set_value(util.c("FW: ", version)) end)
+    comms_v.register(databus.ps, "comms_version", function (version) comms_v.set_value(util.c("NT: v", version)) end)
 
     --
     -- page handling
@@ -85,15 +87,27 @@ local function init(panel)
     -- accounts page
 
     local accounts_page = Div{parent=page_div, x=1, y=1, hidden=true}
-    local account_list = ListBox{parent=accounts_page, x=2, y=2, width=term_w-2, scroll_height=1000}
+    local account_list = ListBox{parent=accounts_page, x=2, y=2, width=term_w-2, scroll_height=1000, fg_bg=style.fp.text_fg, nav_fg_bg=cpair(colors.gray,colors.lightGray), nav_active=cpair(colors.black, colors.gray)}
+    local _ = Div{parent=account_list,height=1}
 
-    local panes = { main_page, accounts_page }
+    -- info page
+
+    local info_page = Div{parent=page_div, y=1, hidden=true}
+    local info = Div{parent=info_page, height=6, x=2, y=2}
+
+    TextBox{parent=info, text="SVR \x1a Server Status"}
+    TextBox{parent=info, text="CLI \x1a Client Connections"}
+
+    -- assemble page_div panes
+
+    local panes = { main_page, accounts_page, info_page }
 
     local page_pane = MultiPane{parent=page_div, x=1, y=1, panes=panes}
 
     local tabs = {
         { name = "SVR", color = style.fp.text },
-        { name = "ACC", color = style.fp.text }
+        { name = "ACC", color = style.fp.text },
+        { name = "INF", color = style.fp.text }
     }
 
     TabBar{parent=panel, y=2, tabs=tabs, min_width=7, callback=page_pane.set_value, fg_bg=style.theme.highlight_box_bright}

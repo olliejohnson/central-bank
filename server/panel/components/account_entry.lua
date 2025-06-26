@@ -23,7 +23,7 @@ local cpair = core.cpair
 local function init(parent, id)
     local s_hi_box = style.theme.highlight_box
 
-    local label_fg = style.fp.lable_fg
+    local label_fg = style.fp.label_fg
 
     local term_w, _ = term.getSize()
 
@@ -31,17 +31,22 @@ local function init(parent, id)
     local root = Div{parent=parent,x=2,y=2,height=4,width=parent.get_width()-2}
     local entry = Div{parent=root,x=2,y=1,height=3,fg_bg=style.theme.highlight_box_bright}
 
-    local ps_prefix = "account_"..id.."_"
+    local ps_prefix = "cli_"..id.."_"
 
     TextBox{parent=entry, x=1, y=1, text="", width=8, fg_bg=s_hi_box}
     local account_id = TextBox{parent=entry, x=1, y=2, text="@ C ??", alignment=ALIGN.CENTER, width=8, fg_bg=s_hi_box, nav_active=cpair(colors.gray,colors.black)}
-    account_id.register(databus.ps, ps_prefix, account_id.set_value)
+    TextBox{parent=entry,x=1,y=3,text="",width=8,fg_bg=s_hi_box}
+    account_id.register(databus.ps, ps_prefix .. "addr", account_id.set_value)
 
-    TextBox{parent=entry,x=term_w-15,y=2,text="RTT:",width=4}
-    local rtu_rtt = DataIndicator{parent=entry,x=term_w-11,y=2,label="",unit="",format="%5d",value=0,width=5,fg_bg=label_fg}
+    TextBox{parent=entry,x=10,y=2,text="FW:",width=3}
+    local cli_fw_v = TextBox{parent=entry,x=14,y=2,text=" ------- ",width=20,fg_bg=label_fg}
+    cli_fw_v.register(databus.ps, ps_prefix .. "fw", cli_fw_v.set_value)
+
+    TextBox{parent=entry,x=term_w-16,y=2,text="RTT:",width=4}
+    local cli_rtt = DataIndicator{parent=entry,x=term_w-11,y=2,label="",unit="",format="%5d",value=0,width=5,fg_bg=label_fg}
     TextBox{parent=entry,x=term_w-5,y=2,text="ms",width=4,fg_bg=label_fg}
-    rtu_rtt.register(databus.ps, ps_prefix .. "rtt", rtu_rtt.update)
-    rtu_rtt.register(databus.ps, ps_prefix .. "rtt_color", rtu_rtt.recolor)
+    cli_rtt.register(databus.ps, ps_prefix .. "rtt", cli_rtt.update)
+    cli_rtt.register(databus.ps, ps_prefix .. "rtt_color", cli_rtt.recolor)
 
     return root
 end
