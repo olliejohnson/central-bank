@@ -228,6 +228,8 @@ function ppm.should_terminate() return ppm_sys.terminate end
 function ppm.mount_all()
     local ifaces = peripheral.getNames()
 
+    log.debug(ifaces, false)
+
     ppm_sys.mounts = {}
 
     for i = 1, #ifaces do
