@@ -461,7 +461,7 @@ elseif mode == "install" or mode == "update" then
 
     ver.boot.changed = show_pkg_change("bootldr", ver.boot)
     ver.common.changed = show_pkg_change("common", ver.common)
-    ver.comms = show_pkg_change("comms", ver.comms)
+    ver.comms.changed = show_pkg_change("comms", ver.comms)
     if ver.comms.changed and ver.comms.v_local ~= nil then
         print("[comms] ");yellow();println("other devices on the network will require an update");white()
     end
