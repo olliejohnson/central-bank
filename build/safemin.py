@@ -6,14 +6,14 @@ def min_files(path):
     start_sum, end_sum = 0, 0
 
     for (root, _, files) in os.walk(path):
-        os.makedirs('_minfied/' + root, exist_ok=True)
+        os.makedirs('_minified/' + root, exist_ok=True)
 
         for f in files:
             start, end = minify(root + "/" + f)
 
             start_sum = start_sum + start
             end_sum = end_sum + end
-    
+
     delta = start_sum - end_sum
 
     print(f"> done with '{path}': shrunk from {start_sum} bytes to {end_sum} bytes (saved {delta} bytes, or {(100*delta/start_sum):.2f}%)")
@@ -32,16 +32,16 @@ def minify(path: str):
     contents = re.sub(r' --+\[.+]]', '', contents)
 
     if re.search(r'--+\[+', contents) != None:
-        # absoultly not dealing with lua multiline comments
+        # absolutely not dealing with lua multiline comments
         # - there are more important things to do
         # - this minification is intended to be 100% safe, so working with multiline comments is asking for trouble
         # - the project doesn't use them as of writing this (except in test/), and it might as well stay that way
         raise Exception(f"no multiline comments allowed! (offending file: {path})")
-    
+
     if re.search(r'\\$', contents, flags=re.MULTILINE) != None:
-        # '\' allows for multiline strings, which require reverting to processing syntax line by line to support them
+        # '\' allows for multiline strings, which would require reverting to processing syntax line by line to support them
         raise Exception(f"no escaping newlines! (offending file: {path})")
-    
+
     # drop the comments, unless the line has quotes, because quotes are scary
     # (quotes are scary since we could actually be inside a string: "-- ..." shouldn't get deleted)
     # -> whitespace before '--' and anything after that, which includes '---' comments
@@ -51,11 +51,11 @@ def minify(path: str):
     minified = re.sub(r'^ +', '', minified, flags=re.MULTILINE)
 
     # drop blank lines
-    while minified != re.sub('r\n\n', '\n', minified):
-        minfied = re.sub(r'\n\n', '\n', minified)
-    
+    while minified != re.sub(r'\n\n', '\n', minified):
+        minified = re.sub(r'\n\n', '\n', minified)
+
     # write the minified file
-    f_min = open(f"_minfied/{path}", "w")
+    f_min = open(f"_minified/{path}", "w")
     f_min.write(minified)
     f_min.close()
 
@@ -66,7 +66,7 @@ def minify(path: str):
     return size_start, size_end
 
 # minify applications and libraries
-dirs = [ 'cb-common', 'graphics', 'ccryptolib', 'ecnet2', 'cb-server' ]
+dirs = [ 'cb-common', 'graphics', 'ecnet2', 'ccryptolib', 'server' ]
 for _, d in enumerate(dirs):
     min_files(d)
 
@@ -77,7 +77,7 @@ minify("configure.lua")
 
 # copy in license for build usage
 lic1 = open("LICENSE", "r")
-lic2 = open("_minify/LICENSE", "w")
+lic2 = open("_minified/LICENSE", "w")
 lic2.write(lic1.read())
 lic1.close()
 lic2.close()

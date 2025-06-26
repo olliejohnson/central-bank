@@ -6,7 +6,7 @@ import subprocess
 path_prefix = "./_minified/"
 
 # get git build info
-build = subprocess.check_output(["git", "describe", "--tags"]).strip().decode("UTF-8")
+build = subprocess.check_output(["git", "describe", "--tags"]).strip().decode('UTF-8')
 
 # list files in a directory
 def list_files(path):
@@ -14,8 +14,8 @@ def list_files(path):
 
     for (root, dirs, files) in os.walk(path):
         for f in files:
-            list.append((root[2:] + "/" + f).replace('\\', '/'))
-    
+            list.append((root[2:] + "/" + f).replace('\\','/'))
+
     return list
 
 # recursively encode files with base64
@@ -31,7 +31,7 @@ def encode_recursive(path):
             handle.close()
         else:
             list[item] = encode_recursive(item_path)
-    
+
     return list
 
 # encode listed files with base64
@@ -44,7 +44,7 @@ def encode_files(files):
         handle = open(item_path, 'r')
         list[item] = base64.b64encode(bytes(handle.read(), 'UTF-8')).decode('ASCII')
         handle.close()
-    
+
     return list
 
 # get the version of an application at the provided path
@@ -62,7 +62,7 @@ def get_version(path, is_lib = False):
         if pos >= 0:
             ver = line[(pos + len(string)):(len(line) - 2)]
             break
-    
+
     f.close()
 
     return ver
@@ -83,7 +83,7 @@ manifest = {
         "graphics": encode_recursive(path_prefix + "./graphics"),
         "ccryptolib": encode_recursive(path_prefix + "./ccryptolib"),
         "ecnet2": encode_recursive(path_prefix + "./ecnet2"),
-        "server": encode_recursive(path_prefix + "./cb-server")
+        "server": encode_recursive(path_prefix + "./server")
     },
     "install_files": {
         # common files
@@ -98,7 +98,7 @@ manifest = {
 
 # write the application installation items as Lua tables
 def write_items(body, items, indent):
-    indent_str = " " + indent
+    indent_str = " " * indent
     for key, value in items.items():
         if isinstance(value, str):
             body = body + f"{indent_str}['{key}'] = \"{value}\",\n"
@@ -106,7 +106,7 @@ def write_items(body, items, indent):
             body = body + f"{indent_str}['{key}'] = {{\n"
             body = write_items(body, value, indent + 4)
             body = body + f"{indent_str}}},\n"
-    
+
     return body
 
 # create output directory

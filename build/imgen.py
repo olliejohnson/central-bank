@@ -50,14 +50,14 @@ def make_manifest(size):
             "bootloader" : get_version("./startup.lua"),
             "common" : get_version("./cb-common/util.lua", True),
             "graphics" : get_version("./graphics/core.lua", True),
-            "server": get_version("./cb-server/startup.lua"),
+            "server": get_version("./server/startup.lua"),
         },
         "files" : {
             # common files
             "system" : [ "initenv.lua", "startup.lua", "configure.lua", "LICENSE" ],
-            "common" : list_files("./scada-common"),
+            "common" : list_files("./cb-common"),
             "graphics" : list_files("./graphics"),
-            "ccryptolib": list_files("./ccrytolib"),
+            "ccryptolib": list_files("./ccryptolib"),
             "ecnet2": list_files("./ecnet2"),
             # platform files
             "server": list_files("./cb-server")
